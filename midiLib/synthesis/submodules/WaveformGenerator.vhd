@@ -21,11 +21,11 @@ port (
 	avs_writedata_phase_increments_voice0   : in  std_logic_vector(63 downto 0);
 	avs_write_n_phase_increments_voice0   	: in  std_logic;
 	
-	--avs_writedata_phase_increments_voice1   : in  std_logic_vector(63 downto 0);
-	--avs_write_n_phase_increments_voice1 	: in  std_logic;
+	avs_writedata_phase_increments_voice1   : in  std_logic_vector(63 downto 0);
+	avs_write_n_phase_increments_voice1 	: in  std_logic;
 	
-	--avs_writedata_phase_increments_voice2   : in  std_logic_vector(63 downto 0);
-	--avs_write_n_phase_increments_voice2 	: in  std_logic;
+	avs_writedata_phase_increments_voice2   : in  std_logic_vector(63 downto 0);
+	avs_write_n_phase_increments_voice2 	: in  std_logic;
 	
 	
 	--note end signals
@@ -33,11 +33,11 @@ port (
 	avs_writedata_note_end_voice0   : in  std_logic_vector(7 downto 0);
 	avs_write_n_note_end_voice0   	: in  std_logic;
 	
-	--avs_writedata_note_end_voice1   : in  std_logic_vector(7 downto 0);
-	--avs_write_n_note_end_voice1   	: in  std_logic;
+	avs_writedata_note_end_voice1   : in  std_logic_vector(7 downto 0);
+	avs_write_n_note_end_voice1   	: in  std_logic;
 	
-	--avs_writedata_note_end_voice2   : in  std_logic_vector(7 downto 0);
-	--avs_write_n_note_end_voice2   	: in  std_logic;
+	avs_writedata_note_end_voice2   : in  std_logic_vector(7 downto 0);
+	avs_write_n_note_end_voice2   	: in  std_logic;
 
 	
 	--wave shape selector, uniform across all voices
