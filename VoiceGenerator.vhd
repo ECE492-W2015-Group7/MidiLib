@@ -25,7 +25,7 @@ port (
 
 	wave_shapes			: in std_logic_vector(7 downto 0);
 	
-	waveSum				: out std_logic_vector(15 downto 0)
+	waveSum				: out std_logic_vector(15 downto 0);
   );
 end entity;
 
@@ -75,7 +75,7 @@ begin
 			oscillator1_phase_inc <= phase_increments(31 downto 16);
 			oscillator2_phase_inc <= phase_increments(47 downto 32);
 		end if;
-	end process ;
+	end process delay_regs;
 
 	o0: Oscillator
 	port map

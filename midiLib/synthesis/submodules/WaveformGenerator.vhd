@@ -21,11 +21,13 @@ port (
 	avs_writedata_phase_increments_voice0   : in  std_logic_vector(63 downto 0);
 	avs_write_n_phase_increments_voice0   	: in  std_logic;
 	
-	avs_writedata_phase_increments_voice1   : in  std_logic_vector(63 downto 0);
-	avs_write_n_phase_increments_voice1 	: in  std_logic;
+	--avs_send_n_phase_increments_voice0   	: out  std_logic;
 	
-	avs_writedata_phase_increments_voice2   : in  std_logic_vector(63 downto 0);
-	avs_write_n_phase_increments_voice2 	: in  std_logic;
+	--avs_writedata_phase_increments_voice1   : in  std_logic_vector(63 downto 0);
+	--avs_write_n_phase_increments_voice1 	: in  std_logic;
+	
+	--avs_writedata_phase_increments_voice2   : in  std_logic_vector(63 downto 0);
+	--avs_write_n_phase_increments_voice2 	: in  std_logic;
 	
 	
 	--note end signals
@@ -33,16 +35,21 @@ port (
 	avs_writedata_note_end_voice0   : in  std_logic_vector(7 downto 0);
 	avs_write_n_note_end_voice0   	: in  std_logic;
 	
-	avs_writedata_note_end_voice1   : in  std_logic_vector(7 downto 0);
-	avs_write_n_note_end_voice1   	: in  std_logic;
+	--avs_send_n_note_end_voice0		: out std_logic;
 	
-	avs_writedata_note_end_voice2   : in  std_logic_vector(7 downto 0);
-	avs_write_n_note_end_voice2   	: in  std_logic;
+	--avs_writedata_note_end_voice1   : in  std_logic_vector(7 downto 0);
+	--avs_write_n_note_end_voice1   	: in  std_logic;
+	
+	--avs_writedata_note_end_voice2   : in  std_logic_vector(7 downto 0);
+	--avs_write_n_note_end_voice2   	: in  std_logic;
 
 	
 	--wave shape selector, uniform across all voices
 	avs_writedata_wave_shapes 	: in std_logic_vector(7 downto 0);
-	avs_write_n_wave_shapes 	: in std_logic	
+	avs_write_n_wave_shapes 	: in std_logic
+	
+	--avs_senddata_wave_shapes	: out std_logic_vector(7 downto 0);
+	--avs_send_n_wave_shapes		:std_logic
   );
 end entity;
 
@@ -103,27 +110,27 @@ v0: VoiceGenerator
 	);
 
 	
-v1: VoiceGenerator
-	port map(
-		clk => clk,
-		reset_n => reset_n,
-		phase_increments => avs_writedata_phase_increments_voice1,
-		start_note_n => avs_write_n_phase_increments_voice1,
-		end_note_n => avs_write_n_note_end_voice1,
-		wave_shapes => avs_writedata_wave_shapes,
-		waveSum => voice1_wave
-	);
+-- v1: VoiceGenerator
+	-- port map(
+		-- clk => clk,
+		-- reset_n => reset_n,
+		-- phase_increments => avs_writedata_phase_increments_voice1,
+		-- start_note_n => avs_write_n_phase_increments_voice1,
+		-- end_note_n => avs_write_n_note_end_voice1,
+		-- wave_shapes => avs_writedata_wave_shapes,
+		-- waveSum => voice1_wave
+	-- );
 
-v2: VoiceGenerator
-	port map(
-		clk => clk,
-		reset_n => reset_n,
-		phase_increments => avs_writedata_phase_increments_voice2,
-		start_note_n => avs_write_n_phase_increments_voice2,
-		end_note_n => avs_write_n_note_end_voice2,
-		wave_shapes => avs_writedata_wave_shapes,
-		waveSum => voice2_wave
-	);	
+-- v2: VoiceGenerator
+	-- port map(
+		-- clk => clk,
+		-- reset_n => reset_n,
+		-- phase_increments => avs_writedata_phase_increments_voice2,
+		-- start_note_n => avs_write_n_phase_increments_voice2,
+		-- end_note_n => avs_write_n_note_end_voice2,
+		-- wave_shapes => avs_writedata_wave_shapes,
+		-- waveSum => voice2_wave
+	-- );	
 
 
 end architecture;

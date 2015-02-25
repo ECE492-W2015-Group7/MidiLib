@@ -2,7 +2,7 @@ set_global_assignment -entity "midiLib" -library "midiLib" -name IP_TOOL_NAME "q
 set_global_assignment -entity "midiLib" -library "midiLib" -name IP_TOOL_VERSION "12.1sp1"
 set_global_assignment -entity "midiLib" -library "midiLib" -name IP_TOOL_ENV "qsys"
 set_global_assignment -library "midiLib" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../midiLib.sopcinfo"]
-set_instance_assignment -entity "midiLib" -library "midiLib" -name SLD_INFO "QSYS_NAME midiLib HAS_SOPCINFO 1 GENERATION_ID 1424809517"
+set_instance_assignment -entity "midiLib" -library "midiLib" -name SLD_INFO "QSYS_NAME midiLib HAS_SOPCINFO 1 GENERATION_ID 1424903334"
 set_global_assignment -library "midiLib" -name MISC_FILE [file join $::quartus(qip_path) "../../midiLib.cmp"]
 set_global_assignment -name SYNTHESIS_ONLY_QIP ON
 set_global_assignment -library "midiLib" -name MISC_FILE [file join $::quartus(qip_path) "../../midiLib.qsys"]
@@ -38,6 +38,8 @@ set_global_assignment -library "midiLib" -name SYSTEMVERILOG_FILE [file join $::
 set_global_assignment -library "midiLib" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_master_agent.sv"]
 set_global_assignment -library "midiLib" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_slave_translator.sv"]
 set_global_assignment -library "midiLib" -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_merlin_master_translator.sv"]
+set_global_assignment -library "midiLib" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/WaveformGenerator.vhd"]
+set_global_assignment -library "midiLib" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/DE2_CONSTANTS.vhd"]
 set_global_assignment -library "midiLib" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/midiLib_sram_0.v"]
 set_global_assignment -library "midiLib" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/midiLib_sdram_0.v"]
 set_global_assignment -library "midiLib" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/altera_up_character_lcd_communication.v"]
@@ -51,8 +53,6 @@ set_global_assignment -library "midiLib" -name VERILOG_FILE [file join $::quartu
 set_global_assignment -library "midiLib" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/midiLib_sysid_qsys_0.v"]
 set_global_assignment -library "midiLib" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/midiLib_onchip_memory2_0.hex"]
 set_global_assignment -library "midiLib" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/midiLib_onchip_memory2_0.v"]
-set_global_assignment -library "midiLib" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/WaveformGenerator.vhd"]
-set_global_assignment -library "midiLib" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/DE2.qsf"]
 set_global_assignment -library "midiLib" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/midiLib_altpll_0.v"]
 set_global_assignment -library "midiLib" -name SDC_FILE [file join $::quartus(qip_path) "submodules/midiLib_nios2_qsys_0.sdc"]
 set_global_assignment -library "midiLib" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/midiLib_nios2_qsys_0.v"]
