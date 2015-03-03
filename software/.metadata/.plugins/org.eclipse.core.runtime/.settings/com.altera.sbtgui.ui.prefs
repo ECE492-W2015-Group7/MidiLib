@@ -1,4 +1,4 @@
 eclipse.preferences.version=1
-newSoftwareExampleWizardPage.defaultLocation=C\:\\Users\\eorodrig\\ece492\\MidiLib\\software\\midLib
-newSoftwareExampleWizardPage.sopcinfoFile=C\:\\Users\\eorodrig\\ece492\\MidiLib\\midiLib.sopcinfo
-newSoftwareExampleWizardPage2.newBspLocation=C\:\\Users\\eorodrig\\ece492\\MidiLib\\software\\midLib_bsp
+newSoftwareExampleWizardPage.defaultLocation=C\:\\Users\\eorodrig\\ece492\\SynthesizerPrototypeV2\\sythesizerPrototype_restored\\software\\SynthesizerSoftware
+newSoftwareExampleWizardPage.sopcinfoFile=C\:\\Users\\eorodrig\\ece492\\SynthesizerPrototypeV2\\sythesizerPrototype_restored\\niosII_system.sopcinfo
+newSoftwareExampleWizardPage2.newBspLocation=C\:\\Users\\eorodrig\\ece492\\SynthesizerPrototypeV2\\sythesizerPrototype_restored\\software\\SynthesizerSoftware_bsp
