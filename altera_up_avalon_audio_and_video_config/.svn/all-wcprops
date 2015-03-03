@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio_and_video_config
+END
+up_ip_generator.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio_and_video_config/up_ip_generator.tcl
+END
+altera_up_avalon_audio_and_video_config_sw.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio_and_video_config/altera_up_avalon_audio_and_video_config_sw.tcl
+END
+altera_up_avalon_audio_and_video_config_hw.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio_and_video_config/altera_up_avalon_audio_and_video_config_hw.tcl
+END

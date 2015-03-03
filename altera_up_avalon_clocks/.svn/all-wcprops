@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_clocks
+END
+up_ip_generator.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_clocks/up_ip_generator.tcl
+END
+altera_up_avalon_clocks_hw.tcl
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_clocks/altera_up_avalon_clocks_hw.tcl
+END

@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/HAL/src
+END
+component.mk
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/HAL/src/component.mk
+END
+altera_up_avalon_audio.c
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/HAL/src/altera_up_avalon_audio.c
+END

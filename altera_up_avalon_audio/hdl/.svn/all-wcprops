@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/hdl
+END
+altera_up_clock_edge.v
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/hdl/altera_up_clock_edge.v
+END
+altera_up_sync_fifo.v
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/hdl/altera_up_sync_fifo.v
+END
+altera_up_audio_out_serializer.v
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/hdl/altera_up_audio_out_serializer.v
+END
+altera_up_avalon_audio.v
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/hdl/altera_up_avalon_audio.v
+END
+altera_up_audio_in_deserializer.v
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/hdl/altera_up_audio_in_deserializer.v
+END
+altera_up_audio_bit_counter.v
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/ece492_vm/!svn/ver/3/trunk/altera_up_avalon_audio/hdl/altera_up_audio_bit_counter.v
+END
