@@ -24,12 +24,17 @@
 *     Periodic System Timer                                              *
 *   -Know Issues                                                         *
 *     If this design is run on the ISS, terminal output will take several*
-*     minutes per iteration.                                             *
+*     minutes per iteration.
+*
+*
+*     http://www.phy.mtu.edu/~suits/notefreqs.html
+*     newt.phys.unsw.edu.au/jw/notes.html                              *
 **************************************************************************/
 
 
 #include <stdio.h>
 #include "includes.h"
+#include <math.h>
 #include "C:\Users\eorodrig\ece492\SynthesizerPrototypeV2\altera_up_avalon_audio\HAL\inc\altera_up_avalon_audio.h"
 #include "C:\Users\eorodrig\ece492\SynthesizerPrototypeV2\altera_up_avalon_audio_and_video_config\HAL\inc\altera_up_avalon_audio_and_video_config.h"
 
@@ -47,8 +52,195 @@ OS_STK    task2_stk[TASK_STACKSIZE];
 /*Defines the buffer size */
 #define     BUFFER_SIZE    128
 
+//total number of lasers (voices)
+#define 	TOTAL_VOICES	8
+
+
+//WaveSelection
+#define		WAVE_SINE		32
+#define		WAVE_SAW		8
+#define		WAVE_SQUARE		1
+
+//this is the size of our LUT
+#define		SINE_TABLE_SIZE		4096
+
+//MIDI Signals received == 3 bytes
+//Byte 1: Note status
+//This defines the note statuses
+#define		NOTE_ON			1
+#define		NOTE_OFF		0
+
+
+
+//Byte 2: Pitch (Note)
+//this defines the notes frequencies
+#define		FREQ_EMPTY_NOTE		0
+#define 	FREQ_BASE			8.1757989156
+#define		FREQ_CLK			50000000
+
+#define		EMPTY_NOTE			0
+
+
+//Byte 3: Velocity
+//this defines the velocities
+#define		OFF_VELOCITY	0
+
+struct voice
+{
+	int status;
+	int note;
+	int velocity;
+};
+
+static struct voice VOICE_TABLE[TOTAL_VOICES];
+
+
+
+//this sends the Note to selected voice
+
+void sendNoteOn2Voice(long sampleFreq, int voiceNum)
+{
+	int *voicePhaseAddr = 0;
+	int *noteOffAddr = 0;
+	int *waveformShapesAddr = (int *)WAVEFORMGENERATOR_0_WAVE_SHAPES_BASE;
+
+	long sampleFreqOsc1=sampleFreq;
+	long sampleFreqOsc2= sampleFreq *2;
+	long sampleFreqOsc3= sampleFreq /2;
+
+	//this gets the memory address of the selected memory components
+	switch(voiceNum){
+	case 0:
+		voicePhaseAddr = (int *) WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE0_BASE;
+		noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE0_BASE;
+		break;
+	case 1:
+		voicePhaseAddr = (int *) WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE1_BASE;
+		noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE1_BASE;
+		break;
+	case 2:
+		voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE2_BASE;
+		noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE2_BASE;
+		break;
+	case 3:
+		voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE3_BASE;
+		noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE3_BASE;
+		break;
+	case 4:
+		voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE4_BASE;
+		noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE4_BASE;
+		break;
+	case 5:
+		voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE5_BASE;
+		noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE5_BASE;
+		break;
+	case 6:
+		voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE6_BASE;
+		noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE6_BASE;
+		break;
+	case 7:
+		voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE7_BASE;
+		noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE7_BASE;
+		break;
+	default:
+		voicePhaseAddr = 0;
+		noteOffAddr = 0;
+		break;
+
+	}
+
+	//while the address is not 0
+	if (voicePhaseAddr != 0)
+	{
+		*voicePhaseAddr	=  (sampleFreqOsc1 << 32) + (sampleFreqOsc2 << 16) + sampleFreqOsc3;
+		*noteOffAddr 	= 11;
+		*waveformShapesAddr = WAVE_SINE + WAVE_SAW + WAVE_SQUARE;
+	}
+
+
+}
+
+/**
+ * This Iterate through the voice/note table and look for an empty voice
+ * If it finds an unused (off) note, it will use that voice
+ * If all the voices are used, it does nothing
+ *
+ * it returns the index
+ */
+int turnOnVoice(int noteNum, int velocity,long sampleFreq){
+
+	int index = 0;
+
+	  for (index = 0; index < TOTAL_VOICES; index++)
+	  {
+		  if (NOTE_OFF == VOICE_TABLE[index].status)
+		  {
+			  VOICE_TABLE[index].note = noteNum;
+			  VOICE_TABLE[index].status = NOTE_ON;
+			  VOICE_TABLE[index].velocity = velocity;
+
+			  sendNoteOn2Voice(sampleFreq, index);
+
+			  return index;
+		  }
+	  }
+
+	  return -1;
+}
+
+
+
+
+/**
+ * This Iterate through the voice/note table and look for a note to turn off
+ * If it finds a specific note, it will reset the note to an off state
+ * If it doesn't find it, it does nothing
+ */
+int turnOffVoice(int noteNum, int velocity){
+
+	int index = 0;
+
+	  for (index = 0; index < TOTAL_VOICES; index++)
+	  {
+		  if (noteNum == VOICE_TABLE[index].note)
+		  {
+			  VOICE_TABLE[index].note = EMPTY_NOTE;
+			  VOICE_TABLE[index].status = NOTE_OFF;
+			  VOICE_TABLE[index].velocity = OFF_VELOCITY;
+
+			 return index;
+		  }
+	  }
+
+	  return -1;
+}
+
+/**
+ * This will calculate the frequency of the midi note
+
+ */
+double midiNote2midiFreq(int midiNote)
+{
+	return FREQ_BASE*pow(2,(midiNote/12));
+}
+
+
+/**
+ * This will calculate the sampling frequency used to sample the SINE LUT
+ */
+long midiFreq2sampleFreq(double midiFreq)
+{
+
+	long sampleFreq = (midiFreq/FREQ_CLK)*SINE_TABLE_SIZE;
+
+	return sampleFreq;
+
+}
+
+
+
 /* Prints "Hello World" and sleeps for three seconds */
-void task1(void* pdata)
+void task3(void* pdata)
 {
 
 	alt_up_audio_dev * audio_dev;
@@ -112,19 +304,76 @@ void task1(void* pdata)
 
 }
 /* Prints "Hello World" and sleeps for three seconds */
-void task2(void* pdata)
+void PollForNotesTask(void* pdata)
 {
+
+	int noteStatus = NOTE_OFF;
+	int pitch = 60;
+	int velocity = 120;
+
+	double midiFreq = 0;
+	long sampleFreq = 0;
+	int voiceNumber = 0;
+
   while (1)
   { 
-    printf("Hello from task2\n");
-    OSTimeDlyHMSM(0, 0, 3, 0);
+
+    OSTimeDlyHMSM(0, 0, 20, 0);
+
+	  if (velocity != 0)
+	  {
+		  midiFreq = midiNote2midiFreq(pitch);
+		  printf(midiFreq);
+		  sampleFreq = midiFreq2sampleFreq(midiFreq);
+		  printf(sampleFreq);
+		  voiceNumber = turnOnVoice(pitch, velocity, sampleFreq);
+		  printf(voiceNumber);
+
+	  }
+	  else
+	  {
+		  voiceNumber = turnOffVoice(pitch, velocity);
+		  printf(voiceNumber);
+	  }
+
   }
 }
+
+
+
+
+
+
+
+/* Prints "Hello World" and sleeps for three seconds */
+void task2(void* pdata)
+{
+
+	int noteStatus = NOTE_ON;
+	int pitch = 60;
+	int velocity = 120;
+
+	//Slong phase_inc =
+
+	  //phase_inc =
+  while (1)
+  {
+	  int x =1;
+  }
+
+
+}
+
+
+
+
+
+
 /* The main function creates two task and starts multi-tasking */
 int main(void)
 {
-  
-  OSTaskCreateExt(task1,
+
+  OSTaskCreateExt(PollForNotesTask,
                   NULL,
                   (void *)&task1_stk[TASK_STACKSIZE-1],
                   TASK1_PRIORITY,
@@ -133,8 +382,8 @@ int main(void)
                   TASK_STACKSIZE,
                   NULL,
                   0);
-              
-               
+
+
   OSTaskCreateExt(task2,
                   NULL,
                   (void *)&task2_stk[TASK_STACKSIZE-1],

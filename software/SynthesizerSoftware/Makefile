@@ -142,7 +142,8 @@ ACDS_VERSION := 12.1sp1
 ELF := SynthesizerSoftware.elf
 
 # Paths to C, C++, and assembly source files.
-C_SRCS := MIDISynthesizer.c
+C_SRCS += MIDISynthesizer.c
+C_SRCS += testing.c
 CXX_SRCS :=
 ASM_SRCS :=
 
