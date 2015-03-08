@@ -158,7 +158,7 @@ void fetchSynthAddresses(int voiceNum, double ** voicePhaseAddr, int ** noteOffA
 
 void sendNoteOn2Voice( int voiceNum, float sampleFreq)
 {
-	double *voicePhaseAddr = (int *)0;
+	double *voicePhaseAddr = (double *)0;
 	int *noteOffAddr = (int *)0;
 	int *waveformShapesAddr = (int *)0;
 
@@ -203,7 +203,7 @@ void sendNoteOn2Voice( int voiceNum, float sampleFreq)
 
 void sendNoteOff2Voice( int voiceNum)
 {
-	double *voicePhaseAddr = (int *)0;
+	double *voicePhaseAddr = (double *)0;
 	int *noteOffAddr = (int *)0;
 	int *waveformShapesAddr = (int *)0;
 
@@ -319,36 +319,11 @@ void processNote(int noteStatus, int pitch, int velocity)
 	float midiFreq = 0;
 	float sampleFreq = 0;
 	int voiceNumber = 0;
-	int testing = 0;
-	int count = 0;
+
 
   while (1)
   {
-	  if (count  ==5)
-	   {
-		   testing =1;
-	   }
-	  if (count == -1)
-	  {
-		  testing =0;
-	  }
 
-
-	   if (testing == 0 && count  <5)
-	  {
-
-		  velocity = 10;
-		    pitch = pitch + 20;
-
-	  }
-	  if(testing ==1 && count > -1 )
-	   {
-
-		   pitch = pitch - 20;
-			  velocity = 0;
-
-
-	   }
 
 	   if (velocity != 0)
 		  {
@@ -358,18 +333,17 @@ void processNote(int noteStatus, int pitch, int velocity)
 			  printf("SAMPLE FRQ: %f\n", sampleFreq);
 			  voiceNumber = turnOnVoice(pitch, velocity, sampleFreq);
 			  printf("VOICE ON: %d\n", voiceNumber);
-			  count++;
+
 
 		  }
 		  else
 		  {
 			  voiceNumber = turnOffVoice(pitch, velocity);
 			  printf("VOICE OFF: %d\n", voiceNumber);
-			  count--;
+
 
 		  }
 
-	  OSTimeDlyHMSM(0, 0, 5, 0);
 
 
   }
