@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;SynthesizerSoftware/hello_ucosii.c&apos; to &apos;MIDISynthesizer.c&apos;" description="Rename resource &apos;hello_ucosii.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="hello_ucosii.c" name="MIDISynthesizer.c" stamp="1425336576049" updateReferences="true"/>
-</session>
