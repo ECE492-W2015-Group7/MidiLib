@@ -87,6 +87,8 @@ OS_STK    task2_stk[TASK_STACKSIZE];
 //this defines the velocities
 #define		OFF_VELOCITY	0
 
+
+// each voice has a status, pitch (note), and velocity
 struct voice
 {
 	int status;
@@ -94,6 +96,7 @@ struct voice
 	int velocity;
 };
 
+//we need a list of 8 voices
 static struct voice VOICE_TABLE[TOTAL_VOICES];
 
 
@@ -154,7 +157,7 @@ void fetchSynthAddresses(int voiceNum, double ** voicePhaseAddr, int ** noteOffA
 }
 
 
-//this sends the Note to selected voice
+//this sends the Note on command to selected voice
 
 void sendNoteOn2Voice( int voiceNum, float sampleFreq)
 {
@@ -199,7 +202,7 @@ void sendNoteOn2Voice( int voiceNum, float sampleFreq)
 }
 
 
-//this sends the Note to selected voice
+//this sends the Note off command to selected voice
 
 void sendNoteOff2Voice( int voiceNum)
 {
@@ -312,7 +315,11 @@ float midiFreq2sampleFreq(float midiFreq)
 
 
 
-/* Prints "Hello World" and sleeps for three seconds */
+/*This is the API for the midiDriver*
+ * It requires the status of the note
+ * the pitch (midi note numbeR)
+ * and the velocity (velocity of 0 will result in note off
+ */
 void processNote(int noteStatus, int pitch, int velocity)
 {
 
@@ -320,33 +327,24 @@ void processNote(int noteStatus, int pitch, int velocity)
 	float sampleFreq = 0;
 	int voiceNumber = 0;
 
-
-  while (1)
-  {
-
-
-	   if (velocity != 0)
-		  {
-			  midiFreq = midiNote2midiFreq(pitch);
-			  printf("MIDI FRQ: %f\n", midiFreq);
-			  sampleFreq = midiFreq2sampleFreq(midiFreq);
-			  printf("SAMPLE FRQ: %f\n", sampleFreq);
-			  voiceNumber = turnOnVoice(pitch, velocity, sampleFreq);
-			  printf("VOICE ON: %d\n", voiceNumber);
+	if (velocity != 0)
+	{
+		  midiFreq = midiNote2midiFreq(pitch);
+		  printf("MIDI FRQ: %f\n", midiFreq);
+		  sampleFreq = midiFreq2sampleFreq(midiFreq);
+		  printf("SAMPLE FRQ: %f\n", sampleFreq);
+		  voiceNumber = turnOnVoice(pitch, velocity, sampleFreq);
+		  printf("VOICE ON: %d\n", voiceNumber);
 
 
-		  }
-		  else
-		  {
-			  voiceNumber = turnOffVoice(pitch, velocity);
-			  printf("VOICE OFF: %d\n", voiceNumber);
+	}
+	else
+	{
+			voiceNumber = turnOffVoice(pitch, velocity);
+			printf("VOICE OFF: %d\n", voiceNumber);
+	}
 
 
-		  }
-
-
-
-  }
 }
 
 
