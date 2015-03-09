@@ -33,15 +33,14 @@
 
 
 #include <stdio.h>
-#include "includes.h"
+#include "C:\Users\eorodrig\ece492\MidiLib\altera_up_avalon_audio_and_video_config\HAL\inc\altera_up_avalon_audio_and_video_config.h"
+#include "C:\Users\eorodrig\ece492\MidiLib\altera_up_avalon_audio\HAL\inc\altera_up_avalon_audio.h"
 #include <math.h>
 
 
 /* Definition of Task Stacks */
 #define   TASK_STACKSIZE       2048
-OS_STK    task1_stk[TASK_STACKSIZE];
-OS_STK    task2_stk[TASK_STACKSIZE];
-
+//#include "includes.h"
 /* Definition of Task Priorities */
 
 #define TASK1_PRIORITY      1
@@ -107,53 +106,51 @@ void fetchSynthAddresses(int voiceNum, double ** voicePhaseAddr, int ** noteOffA
 	*noteOffAddr = 3;
 	*waveformShapesAddr = 14;
 
+/*
+	*waveformShapesAddr = (int *)SYNTHESIZER_0_WAVE_SHAPES_BASE;
 
-	//int *waveformShapesAddr = (int *)WAVEFORMGENERATOR_0_WAVE_SHAPES_BASE;
 
-	/*
 		//this gets the memory address of the selected memory components
 		switch(voiceNum){
 		case 0:
-			voicePhaseAddr = (int *) WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE0_BASE;
-			noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE0_BASE;
+			voicePhaseAddr = (int *) SYNTHESIZER_0_PHASE_INCREMENTS_VOICE0_BASE;
+			noteOffAddr = (int *) SYNTHESIZER_0_NOTE_END_VOICE0_BASE;
 			break;
 		case 1:
-			voicePhaseAddr = (int *) WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE1_BASE;
-			noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE1_BASE;
+			voicePhaseAddr = (int *) SYNTHESIZER_0_PHASE_INCREMENTS_VOICE1_BASE;
+			noteOffAddr = (int *) SYNTHESIZER_0_NOTE_END_VOICE1_BASE;
 			break;
 		case 2:
-			voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE2_BASE;
-			noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE2_BASE;
+			voicePhaseAddr = (int *)SYNTHESIZER_0_PHASE_INCREMENTS_VOICE2_BASE;
+			noteOffAddr = (int *) SYNTHESIZER_0_NOTE_END_VOICE2_BASE;
 			break;
 		case 3:
-			voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE3_BASE;
-			noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE3_BASE;
+			voicePhaseAddr = (int *)SYNTHESIZER_0_PHASE_INCREMENTS_VOICE3_BASE;
+			noteOffAddr = (int *) SYNTHESIZER_0_NOTE_END_VOICE3_BASE;
 			break;
 		case 4:
-			voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE4_BASE;
-			noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE4_BASE;
+			voicePhaseAddr = (int *)SYNTHESIZER_0_PHASE_INCREMENTS_VOICE4_BASE;
+			noteOffAddr = (int *) SYNTHESIZER_0_NOTE_END_VOICE4_BASE;
 			break;
 		case 5:
-			voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE5_BASE;
-			noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE5_BASE;
+			voicePhaseAddr = (int *)SYNTHESIZER_0_PHASE_INCREMENTS_VOICE5_BASE;
+			noteOffAddr = (int *) SYNTHESIZER_0_NOTE_END_VOICE5_BASE;
 			break;
 		case 6:
-			voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE6_BASE;
-			noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE6_BASE;
+			voicePhaseAddr = (int *)SYNTHESIZER_0_PHASE_INCREMENTS_VOICE6_BASE;
+			noteOffAddr = (int *) SYNTHESIZER_0_NOTE_END_VOICE6_BASE;
 			break;
 		case 7:
-			voicePhaseAddr = (int *)WAVEFORMGENERATOR_0_PHASE_INCREMENTS_VOICE7_BASE;
-			noteOffAddr = (int *) WAVEFORMGENERATOR_0_NOTE_END_VOICE7_BASE;
+			voicePhaseAddr = (int *)SYNTHESIZER_0_PHASE_INCREMENTS_VOICE7_BASE;
+			noteOffAddr = (int *) SYNTHESIZER_0_NOTE_END_VOICE7_BASE;
 			break;
 		default:
 			voicePhaseAddr = 0;
 			noteOffAddr = 0;
 			break;
-
 		}
-		*/
 
-
+*/
 }
 
 
@@ -293,7 +290,6 @@ int turnOffVoice(int noteNum, int velocity){
 
 /**
  * This will calculate the frequency of the midi note
-
  */
 float midiNote2midiFreq(int midiNote)
 {
@@ -349,6 +345,45 @@ void processNote(int noteStatus, int pitch, int velocity)
 
 
 
+
+void initAudioCodec(){
+
+		//alt_up_audio_dev * audio_dev;
+	    alt_up_av_config_dev * audio_config_dev;
+
+	  //  unsigned int l_buf[BUFFER_SIZE];
+	  //  int i = 0;
+	  //  int writeSizeL = 0;
+
+	    /* Open Devices */
+	   // audio_dev = alt_up_audio_open_dev ("/dev/audio_0");
+	  //  if ( audio_dev == NULL)
+	  //      printf("Error: could not open audio device \n");
+	  //  else
+	 //       printf("Opened audio device \n");
+
+	    audio_config_dev = alt_up_av_config_open_dev(AUDIO_AND_VIDEO_CONFIG_0_NAME);
+	    if ( audio_config_dev == NULL)
+	        printf("Error: could not open audio config device \n");
+	    else
+	        printf("Opened audio config device \n");
+
+	    /* Configure WM8731 */
+	  //  alt_up_audio_reset_audio_core(audio_dev);
+	    alt_up_av_config_reset(audio_config_dev);
+
+	    /* Write to configuration registers in the audio codec; see datasheet for what these values mean */
+	    alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x0, 0x17);
+	    alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x1, 0x17);
+	    alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x2, 0x79);
+	    alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x3, 0x79);
+	    alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x4, 0x15);
+	    alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x5, 0x06);
+	    alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x6, 0x00);
+
+
+
+}
 
 
 
