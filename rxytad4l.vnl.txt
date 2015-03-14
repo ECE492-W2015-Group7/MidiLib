@@ -1,0 +1,16 @@
+﻿added initAudioCodec() call to init the audio_video codec
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Committer: unknown <eorodrig@e3-11-08.ece.ualberta.ca>
+#
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# Changes to be committed:
+#	modified:   software/MidiLib.c
+#	modified:   software/MidiLib.h
+#	new file:   software/hello_alt_main.c
+#
+

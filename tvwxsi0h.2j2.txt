@@ -1,0 +1,22 @@
+﻿Refactored MidiLib.c
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Committer: unknown <eorodrig@e3-11-08.ece.ualberta.ca>
+#
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# Changes to be committed:
+#	modified:   software/MidiLib.c
+#	modified:   software/MidiLib.h
+#	modified:   software/hello_ucosii.c
+#
+# Untracked files:
+#	rxytad4l.vnl.txt
+#	software/MIDI.c
+#	software/MIDI.h
+#
+
