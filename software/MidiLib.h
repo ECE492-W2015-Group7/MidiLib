@@ -15,9 +15,8 @@ int turnOffVoice(int noteNum, int velocity);
 int turnOnVoice(int noteNum, int velocity,float sampleFreq);
 void sendNoteOff2Voice( int voiceNum);
 void sendNoteOn2Voice( int voiceNum, float sampleFreq);
-void fetchSynthAddresses(int voiceNum, double ** voicePhaseAddr, int ** noteOffAddr, int ** waveformShapesAddr);
-void initAudioCodec();
-
+void fetchSynthAddresses(int voiceNum, long long ** voicePhaseAddr, int ** noteOffAddr, int ** waveformShapesAddr);
+void initMidiLib();
 
 
 #endif /* MIDILIB_H_ */

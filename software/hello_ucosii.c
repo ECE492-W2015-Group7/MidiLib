@@ -1,145 +1,141 @@
-/*************************************************************************
-* Copyright (c) 2004 Altera Corporation, San Jose, California, USA.      *
-* All rights reserved. All use of this software and documentation is     *
-* subject to the License Agreement located at the end of this file below.*
-**************************************************************************
-* Description:                                                           *
-* The following is a simple hello world program running MicroC/OS-II.The * 
-* purpose of the design is to be a very simple application that just     *
-* demonstrates MicroC/OS-II running on NIOS II.The design doesn't account*
-* for issues such as checking system call return codes. etc.             *
-*                                                                        *
-* Requirements:                                                          *
-*   -Supported Example Hardware Platforms                                *
-*     Standard                                                           *
-*     Full Featured                                                      *
-*     Low Cost                                                           *
-*   -Supported Development Boards                                        *
-*     Nios II Development Board, Stratix II Edition                      *
-*     Nios Development Board, Stratix Professional Edition               *
-*     Nios Development Board, Stratix Edition                            *
-*     Nios Development Board, Cyclone Edition                            *
-*   -System Library Settings                                             *
-*     RTOS Type - MicroC/OS-II                                           *
-*     Periodic System Timer                                              *
-*   -Know Issues                                                         *
-*     If this design is run on the ISS, terminal output will take several*
-*     minutes per iteration.
-*
-*
-*     http://www.phy.mtu.edu/~suits/notefreqs.html
-*     newt.phys.unsw.edu.au/jw/notes.html                              *
-**************************************************************************/
-
-
 #include <stdio.h>
+#include <string.h>
 #include "includes.h"
-#include <math.h>
-//#include "MidiLib.c"
-#include "midiLib.h"
+#include "altera_up_avalon_character_lcd.h"
+#include "MIDI.h"
+#include <unistd.h>
 
-/* Definition of Task Stacks */
 #define   TASK_STACKSIZE       2048
-OS_STK    task1_stk[TASK_STACKSIZE];
-OS_STK    task2_stk[TASK_STACKSIZE];
+#define   INPUT_POLLING_TASK_PRIORITY      1
+#define   NUMBER_OF_LASER 8
+OS_STK    inputPollingTaskStack[TASK_STACKSIZE];
 
-/* Definition of Task Priorities */
+void inputPollingTask(void* pdata){
+	alt_up_character_lcd_dev * char_lcd_dev;
+	int laserStatus;
+	int* laserStatusPointer =(int* )SWITCH_BASE;
+	int previousLaserStatus;
 
-#define TASK1_PRIORITY      1
-#define TASK2_PRIORITY      2
+	//=========== init LCD ===========
+	char_lcd_dev = alt_up_character_lcd_open_dev ("/dev/character_lcd_0");
+	if ( char_lcd_dev == NULL)
+		alt_printf ("Error: could not open character LCD device\n");
+	else
+		alt_printf ("Opened character LCD device\n");
+	alt_up_character_lcd_init (char_lcd_dev);
+	alt_up_character_lcd_set_cursor_pos(char_lcd_dev, 0, 0);
+	alt_up_character_lcd_string(char_lcd_dev, "MIDIGeneratorPrototype");
 
+	//=========== Start polling  ===========
+	while (1){
+		previousLaserStatus = laserStatus;
+		laserStatus = *laserStatusPointer;
+		if (previousLaserStatus!=laserStatus){
+			printLaserStatusOnLCD(char_lcd_dev,laserStatus);	//For debugging
+			//usleep(1000000);
+			handleLaserStatusChange(previousLaserStatus,laserStatus);
+		}
+	}
+}
 
+/*
+ * Handles changes on laserStatus, and send the corresponding MIDI signal to midiOut
+ * Input: int previousStatus, int currentStatus
+ */
+void handleLaserStatusChange(int previousStatus, int currentStatus){
+	int i;
+	unsigned noteType; //0 = off 1 = on
+	//Find bits that were changed
+	int differentBits = previousStatus^currentStatus;		//XOR: 100 ^ 110 = 010
+	int* midiOutPointer = (int*) MIDIOUT_0_BASE;
+	for (i=0;i<NUMBER_OF_LASER;i++){
+		if( ((1 << i) & (differentBits)) == (1 << i) ){		//if laser i is changed
+			noteType = ((currentStatus &  (1 << i)) ==  (1 << i)) ?  1: 0;
+			*midiOutPointer =  getMidiData(i,noteType);
 
+			processNote(1,getNotePitch(i,noteType),getVelocity(i,noteType));
+		}
+	}
+}
 
+/*
+ * This function construct midi signal according to the midi specification 1.0
+ * More information about the specification: http://www.somascape.org/midi/tech/spec.html
+ * Input: int laserIndex, int noteType (0 = off 1 = on)
+ * Output: int midiData
+ */
+int getMidiData(int laserIndex, int noteType){
 
+	int laserToPitchMappingTable[]={60,62,64,65,67,69,71,73};	//C4 D4 E4 F4 G4 A4 B4 C5
+	int statusByte;
+	int pitchByte;
+	int velocityBtye;
+	int midiData;
 
-/* Prints "Hello World" and sleeps for three seconds */
-void PollForNotesTask(void* pdata)
-{
-	int noteStatus = 1;
-	int pitch = 20;
-	int velocity = 120;
+	statusByte = 144; //10010000 Note On through midi channel 1
+	pitchByte = laserToPitchMappingTable[laserIndex];
+	if (noteType==1){
+		//Defaults to 64 in the absence of velocity sensors
+		velocityBtye = 64;
+	}else{
+		//when velocity is zero = Note Off
+		velocityBtye = 0;
+	}
 
-	processNote(noteStatus, pitch, velocity);
-	  OSTimeDlyHMSM(0, 0, 5, 0);
+	//formate: 	0 statusBtye 1	0 pitchByte 1	0 velocityByte 1
+	midiData = (statusByte<<21) + (1<<20) + (0<<19) + (pitchByte<<11) + (1<<10) + (0<<9) + (velocityBtye<<1) +(1<<0);
 
-
-
+	printf("Note %i\n",laserIndex);
+	printf("NoteType %i\n",noteType);
+	printf("midiData %i\n",midiData);
+	return midiData;
 }
 
 
-
-
-
-
-
-/* Prints "Hello World" and sleeps for three seconds */
-void task2(void* pdata)
-{
-
-
+int getNotePitch(int laserIndex, int noteType){
+	int laserToPitchMappingTable[]={60,62,64,65,67,69,71,73};	//C4 D4 E4 F4 G4 A4 B4 C5
+	return laserToPitchMappingTable[laserIndex];
 }
 
-
-
-
-
-
-/* The main function creates two task and starts multi-tasking */
-int main(void)
-{
-
-  OSTaskCreateExt(PollForNotesTask,
-                  NULL,
-                  (void *)&task1_stk[TASK_STACKSIZE-1],
-                  TASK1_PRIORITY,
-                  TASK1_PRIORITY,
-                  task1_stk,
-                  TASK_STACKSIZE,
-                  NULL,
-                  0);
-
-
-  OSTaskCreateExt(task2,
-                  NULL,
-                  (void *)&task2_stk[TASK_STACKSIZE-1],
-                  TASK2_PRIORITY,
-                  TASK2_PRIORITY,
-                  task2_stk,
-                  TASK_STACKSIZE,
-                  NULL,
-                  0);
-  OSStart();
-  return 0;
+int getVelocity(int laserIndex, int noteType){
+	if (noteType==1){
+		//Defaults to 64 in the absence of velocity sensors
+		 return 64;
+	}else{
+		//when velocity is zero = Note Off
+		 return 0;
+	}
+}
+/*
+ * Print laserStatus as 1 and 0 on the LCD for debugging.
+ * Input: alt_up_character_lcd_dev * char_lcd_dev, int laserStatus
+ */
+void printLaserStatusOnLCD(alt_up_character_lcd_dev * char_lcd_dev, int laserStatus){
+    static char message[9];
+    message[0] = '\0';
+    int i;
+    for (i = 128; i > 0; i >>= 1){
+        strcat(message, ((laserStatus & i) == i) ? "1" : "0");
+    }
+	alt_up_character_lcd_init (char_lcd_dev);
+	alt_up_character_lcd_set_cursor_pos(char_lcd_dev, 0, 0);
+	alt_up_character_lcd_string(char_lcd_dev,"Laser Status:");
+	alt_up_character_lcd_set_cursor_pos(char_lcd_dev, 0, 1);
+	alt_up_character_lcd_string(char_lcd_dev, message);
 }
 
-/******************************************************************************
-*                                                                             *
-* License Agreement                                                           *
-*                                                                             *
-* Copyright (c) 2004 Altera Corporation, San Jose, California, USA.           *
-* All rights reserved.                                                        *
-*                                                                             *
-* Permission is hereby granted, free of charge, to any person obtaining a     *
-* copy of this software and associated documentation files (the "Software"),  *
-* to deal in the Software without restriction, including without limitation   *
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,    *
-* and/or sell copies of the Software, and to permit persons to whom the       *
-* Software is furnished to do so, subject to the following conditions:        *
-*                                                                             *
-* The above copyright notice and this permission notice shall be included in  *
-* all copies or substantial portions of the Software.                         *
-*                                                                             *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  *
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,    *
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE *
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER      *
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING     *
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER         *
-* DEALINGS IN THE SOFTWARE.                                                   *
-*                                                                             *
-* This agreement shall be governed in all respects by the laws of the State   *
-* of California and by the laws of the United States of America.              *
-* Altera does not recommend, suggest or require that this reference design    *
-* file be used in conjunction or combination with any other product.          *
-******************************************************************************/
+int main(void){
+
+	OSTaskCreateExt(inputPollingTask,
+			NULL,
+			(void *)&inputPollingTaskStack[TASK_STACKSIZE-1],
+			INPUT_POLLING_TASK_PRIORITY,
+			INPUT_POLLING_TASK_PRIORITY,
+			inputPollingTaskStack,
+			TASK_STACKSIZE,
+			NULL,
+			0);
+
+	OSStart();
+	return 0;
+}
