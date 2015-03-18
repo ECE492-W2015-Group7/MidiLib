@@ -39,6 +39,7 @@
 #include <unistd.h>
 
 
+
 /*Defines the buffer size */
 #define     BUFFER_SIZE    128
 
@@ -46,7 +47,7 @@
 #define 	TOTAL_VOICES	8
 
 //this is the size of our LUT
-#define		 NUMBER_OF_POINTS_IN_WAVE_LUT		4096
+#define		 NUMBER_OF_POINTS_IN_WAVE_LUT		65536
 
 //MIDI Signals received == 3 bytes
 //Byte 1: Note status
@@ -116,7 +117,6 @@ void setEndVoice(int voiceNum){
 		noteOff = SYNTHESIZER_0_NOTE_END_VOICE0_BASE;
 		break;
 	default:
-		return 0;
 		break;
 	}
 
@@ -140,19 +140,21 @@ void setEndVoice(int voiceNum){
 
 void setWaveform(){
 
-	int * waveform =  SYNTHESIZER_0_WAVE_SHAPES_BASE;
+	char * waveform =  SYNTHESIZER_0_WAVE_SHAPES_BASE;
 
 	//Uncomment to test
 	//this prints out the before change addr and contents
 	printf("Waveform shape before: %x\n",waveform);
 	printf("Waveform shape before: %x\n",*waveform);
 
-	*waveform = (int) (WAVE_SINE + WAVE_SQUARE <<2 +  WAVE_SAW << 4);
+	char combinedWaveForm = WAVE_SINE  + WAVE_SQUARE *pow(2,2) +  WAVE_SAW *pow(2,4);
+
+	*waveform = WAVE_SINE  + WAVE_SQUARE *pow(2,2) +  WAVE_SAW *pow(2,4);
 
 	//Uncomment to test
 	//this prints out the addr and contents of the pointer after the change
 	printf("Waveform shape after: %x\n",waveform);
-	printf("Waveform shape after: \n",*waveform);
+	printf("Waveform shape after: %x\n",*waveform);
 
 }
 
@@ -160,6 +162,7 @@ void setVoice(int voiceNum, int sampleFreqOsc0,int sampleFreqOsc1,int  sampleFre
 
 	long long * voiceAddr;
 
+	printf("voiceNum is : %d\n", voiceNum);
 	switch (voiceNum) {
 	case 0:
 		voiceAddr = SYNTHESIZER_0_PHASE_INCREMENTS_VOICE0_BASE;
@@ -186,22 +189,23 @@ void setVoice(int voiceNum, int sampleFreqOsc0,int sampleFreqOsc1,int  sampleFre
 		voiceAddr = SYNTHESIZER_0_PHASE_INCREMENTS_VOICE7_BASE;
 		break;
 	default:
-		return;
+		//return;
 		break;
-
-	//Uncomment to test
-	//this prints out the before change addr and contents
-	printf("Phase Increment before: %x\n",voiceAddr);
-	printf("Phase Increment before: %x\n",*voiceAddr);
-
-	*voiceAddr = (sampleFreqOsc0 << 32) +  (sampleFreqOsc1 << 16) + (sampleFreqOsc2);
-
-	//Uncomment to test
-	//this prints out the after change addr and contents
-	printf("Phase Increment after: %x\n",voiceAddr);
-	printf("Phase Increment after: %x\n",*voiceAddr);
-
 	}
+
+
+	printf("voiceNum is : %d\n", voiceNum);
+//Uncomment to test
+//this prints out the before change addr and contents
+printf("Phase Increment before: %x\n",voiceAddr);
+printf("Phase Increment before: %x\n",*voiceAddr);
+
+*voiceAddr = 0;
+
+//Uncomment to test
+//this prints out the after change addr and contents
+printf("Phase Increment after: %x\n",voiceAddr);
+printf("Phase Increment after: %x\n",*voiceAddr);
 }
 
 
@@ -283,8 +287,8 @@ int turnOffVoice(int noteNum, int velocity) {
 /**
  * This will calculate the frequency of the midi note
  */
-float midiNote2midiFreq(int midiNote) {
-	return FREQ_BASE * pow(2, (midiNote / 12));
+float midiNote2midiFreq(double midiNote) {
+	return (FREQ_BASE * pow(2, (midiNote / 12)));
 }
 
 /**
