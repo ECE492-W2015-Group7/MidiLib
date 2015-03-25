@@ -35,12 +35,16 @@
 #include "altera_up_avalon_audio_and_video_config.h"
 #include <math.h>
 #include "system.h"
+#include "alt_types.h"
+#include <unistd.h>
+
+
 
 /*Defines the buffer size */
 #define     BUFFER_SIZE    128
 
 //total number of lasers (voices)
-#define 	TOTAL_VOICES	8
+#define 	TOTAL_VOICES	1
 
 //this is the size of our LUT
 #define		 NUMBER_OF_POINTS_IN_WAVE_LUT		4096
@@ -56,6 +60,7 @@
 #define		FREQ_EMPTY_NOTE		0.0
 #define 	FREQ_BASE			8.1757989156
 #define		SAMPLE_RATE			32000
+#define		BITSHIFT_COMPENSATION 16
 
 #define		EMPTY_NOTE			0
 
@@ -63,117 +68,67 @@
 //this defines the velocities
 #define		OFF_VELOCITY	0
 
+
+
 // each voice has a status, pitch (note), and velocity
 struct voice {
 	int status;
 	int note;
-	int velocity;
 };
 
 //we need a list of 8 voices
 static struct voice VOICE_TABLE[TOTAL_VOICES];
 
-//This will fetch memory address of the synthesizer components
-void fetchSynthAddresses(int voiceNum, long long ** voicePhaseAddr,
-		int ** noteOffAddr, int ** waveformShapesAddr) {
+/**
+ * This will calculate the frequency of the midi note
+ */
+float midiNote2midiFreq(double midiNote) {
+	return (FREQ_BASE * pow(2, (midiNote / 12)));
+}
 
-	*waveformShapesAddr = SYNTHESIZER_0_WAVE_SHAPES_BASE;
-	//this gets the memory address of the selected memory components
+/**
+ * This will calculate the sampling frequency used to sample the SINE LUT
+ */
+float midiFreq2sampleFreq(float midiFreq) {
+
+	float sampleFreq = (midiFreq / SAMPLE_RATE) * NUMBER_OF_POINTS_IN_WAVE_LUT * BITSHIFT_COMPENSATION;
+
+	return sampleFreq;
+
+}
+
+/**Tested!*/
+void startVoice(int voiceNum, int sampleRate){
+	int * voiceAddr;
 	switch (voiceNum) {
 	case 0:
-		*voicePhaseAddr = SYNTHESIZER_0_PHASE_INCREMENTS_VOICE0_BASE;
-		*noteOffAddr =  SYNTHESIZER_0_NOTE_END_VOICE0_BASE;
-		break;
-	case 1:
-		*voicePhaseAddr = SYNTHESIZER_0_PHASE_INCREMENTS_VOICE1_BASE;
-		*noteOffAddr = SYNTHESIZER_0_NOTE_END_VOICE1_BASE;
-		break;
-	case 2:
-		*voicePhaseAddr = SYNTHESIZER_0_PHASE_INCREMENTS_VOICE2_BASE;
-		*noteOffAddr =  SYNTHESIZER_0_NOTE_END_VOICE2_BASE;
-		break;
-	case 3:
-		*voicePhaseAddr =  SYNTHESIZER_0_PHASE_INCREMENTS_VOICE3_BASE;
-		*noteOffAddr = SYNTHESIZER_0_NOTE_END_VOICE3_BASE;
-		break;
-	case 4:
-		*voicePhaseAddr = SYNTHESIZER_0_PHASE_INCREMENTS_VOICE4_BASE;
-		*noteOffAddr =  SYNTHESIZER_0_NOTE_END_VOICE4_BASE;
-		break;
-	case 5:
-		*voicePhaseAddr = SYNTHESIZER_0_PHASE_INCREMENTS_VOICE5_BASE;
-		*noteOffAddr = SYNTHESIZER_0_NOTE_END_VOICE5_BASE;
-		break;
-	case 6:
-		*voicePhaseAddr =  SYNTHESIZER_0_PHASE_INCREMENTS_VOICE6_BASE;
-		*noteOffAddr =  SYNTHESIZER_0_NOTE_END_VOICE6_BASE;
-		break;
-	case 7:
-		*voicePhaseAddr =  SYNTHESIZER_0_PHASE_INCREMENTS_VOICE7_BASE;
-		*noteOffAddr =  SYNTHESIZER_0_NOTE_END_VOICE7_BASE;
+		voiceAddr = SYNTHESIZER_0_BASE;
 		break;
 	default:
-		*voicePhaseAddr = 0;
-		*noteOffAddr = 0;
+		//return;
 		break;
 	}
+	*voiceAddr = sampleRate;
 
 }
 
-//this sends the Note on command to selected voice
 
-void sendNoteOn2Voice(int voiceNum, float sampleFreq) {
-	long *voicePhaseAddr = (long *) 0;
-	int *noteOffAddr = (int *) 0;
-	int *waveformShapesAddr = (int *) 0;
-
-	fetchSynthAddresses(voiceNum, &voicePhaseAddr, &noteOffAddr,
-			&waveformShapesAddr);
-
-	printf("A: %04x\n",voicePhaseAddr);
-	printf("B: %04x\n",noteOffAddr);
-	printf("C: %04x\n",waveformShapesAddr);
-
-	int sampleFreqOsc0 = (int) sampleFreq;
-	int sampleFreqOsc1 = (int) sampleFreq * 2;
-	int sampleFreqOsc2 = (int) sampleFreq / 2;
-
-
-	//while the address is not 0
-	if (voicePhaseAddr != 0) {
-
-		//IOWR_ALTERA_AVALON_JTAG_UART_DATA(waveformShapesAddr, 3);
-		IOWR_ALTERA_AVALON_JTAG_UART_DATA(voicePhaseAddr, sampleFreqOsc0  );
-
-		//00 01 10 11
-		//1: Sin
-		//2: Square
-		//3: Saw
-		//*waveformShapesAddr = 0<<5||1<<4||0<<3||1<<2||0<<1||1<<0;
-	//	printf("Before: %02x\n", *waveformShapesAddr);
-
-
-		//printf("After: %02x\n", *waveformShapesAddr);
+/**Tested!*/
+void endVoice(int voiceNum){
+	int * voiceAddr;
+	switch (voiceNum) {
+	case 0:
+		voiceAddr = SYNTHESIZER_0_BASE;
+		break;
+	default:
+		//return;
+		break;
 	}
+	*voiceAddr = 0;
 
 }
 
-//this sends the Note off command to selected voice
 
-void sendNoteOff2Voice(int voiceNum) {
-	long long *voicePhaseAddr = (long long *) 0;
-	int *noteOffAddr = (int *) 0;
-	int *waveformShapesAddr = (int *) 0;
-
-	fetchSynthAddresses(voiceNum, &voicePhaseAddr, &noteOffAddr,
-			&waveformShapesAddr);
-
-	//while the address is not 0
-	if (voicePhaseAddr != 0) {
-		*noteOffAddr = 1;
-	}
-
-}
 
 /**
  * This Iterate through the voice/note table and look for an empty voice
@@ -182,23 +137,24 @@ void sendNoteOff2Voice(int voiceNum) {
  *
  * it returns the index
  */
-int turnOnVoice(int noteNum, int velocity, float sampleFreq) {
+void turnOnVoice(int noteNum) {
 
 	int index = 0;
+	float midiFreq= 0;
+	float sampleFreq = 0;
 
 	for (index = 0; index < TOTAL_VOICES; index++) {
 		if (NOTE_OFF == VOICE_TABLE[index].status) {
 			VOICE_TABLE[index].note = noteNum;
 			VOICE_TABLE[index].status = NOTE_ON;
-			VOICE_TABLE[index].velocity = velocity;
 
-			sendNoteOn2Voice(index, sampleFreq);
 
-			return index;
+			midiFreq = midiNote2midiFreq(noteNum);
+			sampleFreq = midiFreq2sampleFreq(midiFreq);
+			startVoice(index, (int) roundf(sampleFreq));
 		}
 	}
 
-	return -1;
 }
 
 /**
@@ -206,7 +162,7 @@ int turnOnVoice(int noteNum, int velocity, float sampleFreq) {
  * If it finds a specific note, it will reset the note to an off state
  * If it doesn't find it, it does nothing
  */
-int turnOffVoice(int noteNum, int velocity) {
+void turnOffVoice(int noteNum) {
 
 	int index = 0;
 
@@ -214,34 +170,12 @@ int turnOffVoice(int noteNum, int velocity) {
 		if (noteNum == VOICE_TABLE[index].note) {
 			VOICE_TABLE[index].note = EMPTY_NOTE;
 			VOICE_TABLE[index].status = NOTE_OFF;
-			VOICE_TABLE[index].velocity = OFF_VELOCITY;
-
-			sendNoteOff2Voice(index);
-
-			return index;
+			endVoice(index);
 		}
 	}
-
-	return -1;
 }
 
-/**
- * This will calculate the frequency of the midi note
- */
-float midiNote2midiFreq(int midiNote) {
-	return FREQ_BASE * pow(2, (midiNote / 12));
-}
 
-/**
- * This will calculate the sampling frequency used to sample the SINE LUT
- */
-float midiFreq2sampleFreq(float midiFreq) {
-
-	float sampleFreq = (midiFreq / SAMPLE_RATE) * NUMBER_OF_POINTS_IN_WAVE_LUT;
-
-	return sampleFreq;
-
-}
 
 /*This is the API for the midiDriver*
  * It requires the status of the note
@@ -254,59 +188,17 @@ void processNote(int noteStatus, int pitch, int velocity) {
 	float sampleFreq = 0;
 	int voiceNumber = 0;
 
-	printf("passed MidiNote: %d\n", pitch);
 
 	if (velocity != 0) {
 		midiFreq = midiNote2midiFreq(pitch);
-		printf("MIDI FRQ: %f\n", midiFreq);
 		sampleFreq = midiFreq2sampleFreq(midiFreq);
-		printf("SAMPLE FRQ: %f\n", sampleFreq);
-		voiceNumber = turnOnVoice(pitch, velocity, sampleFreq);
-		printf("VOICE ON: %d\n", voiceNumber);
-
+		turnOnVoice(pitch);
 	} else {
-		voiceNumber = turnOffVoice(pitch, velocity);
-		//printf("VOICE OFF: %d\n", voiceNumber);
+		turnOffVoice(pitch);
 	}
 
 }
 
-//Initializes Synthesizer Compo
-void initMidiLib() {
-
-	//alt_up_audio_dev * audio_dev;
-	alt_up_av_config_dev * audio_config_dev;
-
-	//  unsigned int l_buf[BUFFER_SIZE];
-	//  int i = 0;
-	//  int writeSizeL = 0;
-
-	/* Open Devices */
-	// audio_dev = alt_up_audio_open_dev ("/dev/audio_0");
-	//  if ( audio_dev == NULL)
-	//      printf("Error: could not open audio device \n");
-	//  else
-	//       printf("Opened audio device \n");
-	audio_config_dev = alt_up_av_config_open_dev(AUDIO_AND_VIDEO_CONFIG_0_NAME);
-	if (audio_config_dev == NULL)
-		printf("Error: could not open audio config device \n");
-	else
-		printf("Opened audio config device \n");
-
-	/* Configure WM8731 */
-	//  alt_up_audio_reset_audio_core(audio_dev);
-	alt_up_av_config_reset(audio_config_dev);
-
-	/* Write to configuration registers in the audio codec; see datasheet for what these values mean */
-	alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x0, 0x17);
-	alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x1, 0x17);
-	alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x2, 0xF9);
-	alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x3, 0xF9);
-	alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x4, 0x12);
-	alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x5, 0x06);
-	alt_up_av_config_write_audio_cfg_register(audio_config_dev, 0x6, 0x00);
-
-}
 
 /******************************************************************************
  *                                                                             *
